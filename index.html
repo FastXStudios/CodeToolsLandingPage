@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Code Tools++ — AI-Powered Developer Toolkit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg:#05070f;--bg2:#090c18;--bg3:#0e1222;
+  --cyan:#00e5ff;--violet:#8b5cf6;--pink:#f43f8e;--green:#10ffb0;--yellow:#ffd14d;
+  --text:#dde2f0;--muted:#59628a;--border:rgba(0,229,255,0.1);
+  --glow-c:0 0 50px rgba(0,229,255,0.3);--glow-v:0 0 50px rgba(139,92,246,0.3);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;overflow-x:hidden;cursor:none}
+
+#cur{width:10px;height:10px;background:var(--cyan);border-radius:50%;position:fixed;pointer-events:none;z-index:99999;transform:translate(-50%,-50%);mix-blend-mode:screen;transition:width .15s,height .15s,background .15s}
+#cur-ring{width:34px;height:34px;border:1.5px solid rgba(0,229,255,.45);border-radius:50%;position:fixed;pointer-events:none;z-index:99998;transform:translate(-50%,-50%)}
+
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.35;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.05'/%3E%3C/svg%3E")}
+
+.grid-bg{position:fixed;inset:0;background-image:linear-gradient(rgba(0,229,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,.025) 1px,transparent 1px);background-size:64px 64px;pointer-events:none;z-index:0;animation:gridMove 25s linear infinite}
+@keyframes gridMove{to{transform:translateY(64px)}}
+
+.scan{position:fixed;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent 0%,rgba(0,229,255,.18) 50%,transparent 100%);pointer-events:none;z-index:9990;animation:scan 10s linear infinite}
+@keyframes scan{0%{top:0;opacity:0}5%{opacity:1}95%{opacity:1}100%{top:100vh;opacity:0}}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:20px 64px;display:flex;align-items:center;justify-content:space-between;background:rgba(5,7,15,.5);backdrop-filter:blur(24px);border-bottom:1px solid transparent;transition:all .35s}
+nav.scrolled{padding:14px 64px;background:rgba(5,7,15,.92);border-bottom-color:var(--border)}
+.nav-logo{font-family:'Space Mono',monospace;font-size:1rem;font-weight:700;color:var(--cyan);letter-spacing:3px;text-decoration:none}
+.nav-logo em{font-style:normal;color:var(--violet)}
+.nav-links{display:flex;gap:40px;list-style:none}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:.8rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;transition:color .2s;position:relative}
+.nav-links a::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:1px;background:var(--cyan);transition:width .3s}
+.nav-links a:hover{color:var(--cyan)}
+.nav-links a:hover::after{width:100%}
+.nav-btn{display:inline-flex;align-items:center;gap:8px;background:transparent;border:1px solid var(--cyan);color:var(--cyan);padding:9px 22px;font-family:'Space Mono',monospace;font-size:.75rem;font-weight:700;letter-spacing:1.5px;text-decoration:none;cursor:none;transition:all .25s;clip-path:polygon(10px 0%,100% 0%,calc(100% - 10px) 100%,0% 100%)}
+.nav-btn:hover{background:var(--cyan);color:var(--bg);box-shadow:var(--glow-c)}
+
+#hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:130px 40px 100px;position:relative;overflow:hidden}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);pointer-events:none;animation:orbFloat 10s ease-in-out infinite}
+.orb-1{width:700px;height:700px;background:radial-gradient(circle,rgba(139,92,246,.18) 0%,transparent 70%);top:-160px;left:-260px}
+.orb-2{width:550px;height:550px;background:radial-gradient(circle,rgba(0,229,255,.13) 0%,transparent 70%);top:80px;right:-180px;animation-delay:-5s}
+.orb-3{width:450px;height:450px;background:radial-gradient(circle,rgba(244,63,142,.09) 0%,transparent 70%);bottom:0;left:45%;animation-delay:-2.5s}
+@keyframes orbFloat{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-28px) scale(1.04)}}
+
+.hero-icon-wrap{position:relative;display:inline-flex;align-items:center;justify-content:center;margin-bottom:48px}
+.ring{position:absolute;border-radius:50%;border:1px solid;animation:rPulse 3.5s ease-in-out infinite}
+.r1{width:136px;height:136px;border-color:rgba(0,229,255,.5);animation-delay:0s}
+.r2{width:176px;height:176px;border-color:rgba(139,92,246,.28);animation-delay:.55s}
+.r3{width:218px;height:218px;border-color:rgba(0,229,255,.1);animation-delay:1.1s}
+@keyframes rPulse{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.07);opacity:.5}}
+
+.hero-icon{width:90px;height:90px;position:relative;z-index:2;background:linear-gradient(145deg,#131828,#090c18);border-radius:20px;border:1px solid rgba(0,229,255,.35);display:flex;align-items:center;justify-content:center;animation:iconPulse 5s ease-in-out infinite}
+@keyframes iconPulse{0%,100%{box-shadow:0 0 40px rgba(0,229,255,.2),0 0 80px rgba(139,92,246,.1)}50%{box-shadow:0 0 90px rgba(0,229,255,.45),0 0 160px rgba(139,92,246,.25)}}
+
+.hero-badge{display:inline-flex;align-items:center;gap:10px;background:rgba(0,229,255,.05);border:1px solid rgba(0,229,255,.18);color:var(--cyan);font-family:'Space Mono',monospace;font-size:.68rem;letter-spacing:2.5px;padding:7px 18px;margin-bottom:28px;text-transform:uppercase;animation:fadeUp .6s ease both}
+.bdot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:blink 1.4s step-end infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+.hero-title{font-size:clamp(3.2rem,7.5vw,6.8rem);font-weight:800;line-height:.93;margin-bottom:30px;animation:fadeUp .7s ease .1s both}
+.hero-title .t1{display:block;color:var(--text)}
+.hero-title .t2{display:block;background:linear-gradient(125deg,var(--cyan) 0%,var(--violet) 55%,var(--pink) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.glitch{position:relative;display:inline-block}
+.glitch::before,.glitch::after{content:attr(data-text);position:absolute;top:0;left:0;background:linear-gradient(125deg,var(--cyan),var(--violet),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.glitch::before{clip-path:polygon(0 28%,100% 28%,100% 52%,0 52%);animation:g1 5s infinite}
+.glitch::after{clip-path:polygon(0 62%,100% 62%,100% 78%,0 78%);animation:g2 5s infinite}
+@keyframes g1{0%,88%,100%{transform:translate(0)}90%{transform:translate(-3px,1px)}93%{transform:translate(3px,-1px)}96%{transform:translate(-2px,0)}}
+@keyframes g2{0%,88%,100%{transform:translate(0)}91%{transform:translate(3px,2px)}94%{transform:translate(-3px,-2px)}97%{transform:translate(2px,0)}}
+
+.hero-sub{font-size:1.1rem;color:var(--muted);max-width:540px;line-height:1.75;margin:0 auto 52px;font-weight:400;animation:fadeUp .7s ease .2s both}
+
+.hero-btns{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;animation:fadeUp .7s ease .3s both}
+.btn-p{display:inline-flex;align-items:center;gap:10px;background:linear-gradient(130deg,var(--cyan),var(--violet));color:var(--bg);padding:17px 38px;font-family:'Space Mono',monospace;font-size:.88rem;font-weight:700;letter-spacing:1px;text-decoration:none;cursor:none;border:none;clip-path:polygon(14px 0%,100% 0%,calc(100% - 14px) 100%,0% 100%);transition:all .3s;position:relative;overflow:hidden}
+.btn-p::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,.15);transform:translateX(-100%) skewX(-15deg);transition:transform .4s}
+.btn-p:hover::after{transform:translateX(150%) skewX(-15deg)}
+.btn-p:hover{box-shadow:0 0 60px rgba(0,229,255,.5),0 0 120px rgba(139,92,246,.3);transform:translateY(-2px)}
+.btn-s{display:inline-flex;align-items:center;gap:10px;background:transparent;border:1px solid rgba(255,255,255,.14);color:var(--text);padding:16px 34px;font-family:'Space Mono',monospace;font-size:.88rem;font-weight:700;letter-spacing:1px;text-decoration:none;cursor:none;clip-path:polygon(14px 0%,100% 0%,calc(100% - 14px) 100%,0% 100%);transition:all .3s}
+.btn-s:hover{border-color:var(--violet);color:var(--violet);box-shadow:0 0 30px rgba(139,92,246,.2);transform:translateY(-2px)}
+
+.hero-stats{display:flex;gap:64px;justify-content:center;margin-top:88px;animation:fadeUp .7s ease .5s both}
+.h-stat .num{font-family:'Space Mono',monospace;font-size:2.2rem;font-weight:700;color:var(--cyan);display:block}
+.h-stat .lbl{font-size:.72rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-top:4px}
+.stat-sep{width:1px;background:linear-gradient(to bottom,transparent,var(--border),transparent)}
+
+.scroll-ind{position:absolute;bottom:38px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--muted);font-size:.65rem;letter-spacing:2px;text-transform:uppercase;font-family:'Space Mono',monospace;animation:fadeUp 1s ease 1s both}
+.scroll-mouse{width:20px;height:34px;border:1.5px solid rgba(255,255,255,.18);border-radius:10px;position:relative}
+.scroll-mouse::before{content:'';position:absolute;top:5px;left:50%;transform:translateX(-50%);width:2.5px;height:7px;background:var(--cyan);border-radius:2px;animation:sBounce 2s ease infinite}
+@keyframes sBounce{0%,100%{transform:translateX(-50%) translateY(0);opacity:1}80%{transform:translateX(-50%) translateY(10px);opacity:0}}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+
+.ticker-wrap{background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:13px 0;overflow:hidden;position:relative;z-index:2}
+.ticker{display:flex;width:max-content;animation:tick 35s linear infinite}
+.t-item{display:flex;align-items:center;gap:10px;padding:0 36px;font-family:'Space Mono',monospace;font-size:.73rem;color:var(--muted);white-space:nowrap;letter-spacing:1px}
+.t-item svg{color:var(--cyan)}
+.t-sep{color:var(--violet);opacity:.4}
+@keyframes tick{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+.sec-tag{display:inline-flex;align-items:center;gap:8px;font-family:'Space Mono',monospace;font-size:.67rem;letter-spacing:3px;text-transform:uppercase;color:var(--cyan);background:rgba(0,229,255,.05);border:1px solid rgba(0,229,255,.18);padding:5px 14px;margin-bottom:22px}
+.sec-title{font-size:clamp(2rem,4vw,3.2rem);font-weight:800;line-height:1.1;margin-bottom:16px}
+.sec-desc{color:var(--muted);font-size:.95rem;max-width:480px;margin:0 auto;line-height:1.75}
+.sec-head{text-align:center;margin-bottom:72px}
+
+#why{padding:128px 64px;max-width:1200px;margin:0 auto}
+.why-grid{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:center}
+.why-steps{display:flex;flex-direction:column}
+.w-step{display:flex;gap:22px;align-items:flex-start;padding:20px 0;border-bottom:1px solid rgba(255,255,255,.045);opacity:0;transform:translateX(-18px);transition:all .5s ease}
+.w-step.vis{opacity:1;transform:translateX(0)}
+.w-step:last-child{border-bottom:none}
+.w-num{font-family:'Space Mono',monospace;font-size:.68rem;color:var(--violet);min-width:26px;padding-top:3px;letter-spacing:1px}
+.w-text{color:var(--muted);font-size:.92rem;line-height:1.65}
+.strike{text-decoration:line-through;opacity:.45}
+
+.why-card{background:linear-gradient(145deg,#0c1020,#0a0d1c);border:1px solid var(--border);padding:52px 42px;position:relative;overflow:hidden}
+.why-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--cyan),var(--violet),var(--pink))}
+.why-card-tag{font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:3px;color:var(--green);text-transform:uppercase;margin-bottom:18px;display:flex;align-items:center;gap:8px}
+.why-card-tag::before{content:'';width:6px;height:6px;background:var(--green);border-radius:50%;animation:blink 1.4s step-end infinite}
+.why-card h3{font-size:1.85rem;font-weight:800;margin-bottom:18px;line-height:1.2}
+.why-card h3 span{background:linear-gradient(135deg,var(--cyan),var(--violet));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.why-card p{color:var(--muted);line-height:1.75;font-size:.92rem;margin-bottom:32px}
+
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.chip{display:inline-flex;align-items:center;gap:8px;background:rgba(139,92,246,.07);border:1px solid rgba(139,92,246,.2);padding:9px 16px;font-family:'Space Mono',monospace;font-size:.68rem;letter-spacing:1px;color:var(--text);transition:all .25s;cursor:none}
+.chip svg{color:var(--violet)}
+.chip:hover{background:rgba(139,92,246,.15);border-color:var(--violet);color:var(--violet);box-shadow:0 0 20px rgba(139,92,246,.15)}
+
+#features{padding:128px 64px;background:linear-gradient(180deg,var(--bg) 0%,var(--bg2) 50%,var(--bg) 100%)}
+.feat-wrap{max-width:1200px;margin:0 auto}
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--border);border:1px solid var(--border)}
+.fc{background:var(--bg);padding:46px 38px;position:relative;overflow:hidden;opacity:0;transform:translateY(28px);transition:all .5s ease}
+.fc.vis{opacity:1;transform:translateY(0)}
+.fc:hover{background:var(--bg3)}
+.fc::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,229,255,.025),transparent);opacity:0;transition:opacity .3s}
+.fc:hover::after{opacity:1}
+.fc.wide{grid-column:span 2;background:linear-gradient(145deg,#0b0f1e,#0f1326)}
+.fc-icon{margin-bottom:22px;display:flex}
+.fc-icon svg{color:var(--cyan);transition:filter .3s}
+.fc:hover .fc-icon svg{filter:drop-shadow(0 0 12px var(--cyan))}
+.fc-title{font-size:1.15rem;font-weight:700;margin-bottom:12px;color:var(--text)}
+.fc-desc{color:var(--muted);font-size:.86rem;line-height:1.72}
+.fc-tag{display:inline-block;margin-top:20px;font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:2.5px;text-transform:uppercase;color:var(--cyan);background:rgba(0,229,255,.06);border:1px solid rgba(0,229,255,.14);padding:4px 12px}
+.fc-list{list-style:none;margin-top:18px}
+.fc-list li{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:.84rem;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.fc-list li:last-child{border-bottom:none}
+.fc-list li svg{color:var(--cyan);flex-shrink:0}
+.mode-chips{display:flex;gap:8px;margin-top:20px}
+.mchip{font-family:'Space Mono',monospace;font-size:.63rem;padding:5px 14px;letter-spacing:1.5px}
+.mc-c{background:rgba(0,229,255,.07);border:1px solid rgba(0,229,255,.2);color:var(--cyan)}
+.mc-v{background:rgba(139,92,246,.07);border:1px solid rgba(139,92,246,.2);color:var(--violet)}
+
+#ai{padding:128px 64px;max-width:1200px;margin:0 auto}
+.ai-grid{display:grid;grid-template-columns:1.15fr 1fr;gap:80px;align-items:center}
+
+.chat-mock{background:#06090f;border:1px solid var(--border);box-shadow:0 40px 100px rgba(0,0,0,.6),0 0 80px rgba(139,92,246,.08)}
+.chat-topbar{background:#0a0d1a;padding:12px 18px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border)}
+.cdt{width:10px;height:10px;border-radius:50%}
+.cdt:nth-child(1){background:#ff5f57}.cdt:nth-child(2){background:#febc2e}.cdt:nth-child(3){background:#28c840}
+.chat-tabl{font-family:'Space Mono',monospace;font-size:.65rem;color:var(--muted);margin-left:8px;letter-spacing:1px}
+.chat-body{padding:22px 22px 14px;display:flex;flex-direction:column;gap:14px}
+.cmsg{display:flex;gap:11px;align-items:flex-start;opacity:0;transform:translateY(8px);transition:all .4s ease}
+.cmsg.vis{opacity:1;transform:translateY(0)}
+.cav{width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.cav-u{background:rgba(139,92,246,.18);border:1px solid rgba(139,92,246,.35)}
+.cav-a{background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.3)}
+.cbub{background:#0c1322;border:1px solid rgba(255,255,255,.06);padding:12px 15px;font-size:.8rem;line-height:1.65;color:var(--text);max-width:310px}
+.cbub.ai{background:linear-gradient(135deg,#09111e,#0c1530);border-color:rgba(0,229,255,.09)}
+.ccode{background:#040608;border:1px solid rgba(0,229,255,.1);border-left:2px solid var(--cyan);padding:9px 13px;margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--green);white-space:pre;overflow-x:auto}
+.ccode.vi{color:var(--violet)}
+.cinline{color:var(--cyan);font-family:'JetBrains Mono',monospace;font-size:.76rem}
+.chat-inp{padding:13px 16px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.cinput{flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);padding:8px 14px;color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:.73rem;outline:none}
+.csend{background:linear-gradient(135deg,var(--cyan),var(--violet));border:none;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:none;transition:box-shadow .2s}
+.csend:hover{box-shadow:var(--glow-c)}
+
+.ai-content .sec-tag{display:block;text-align:left}
+.ai-content .sec-title{text-align:left}
+.ai-content .sec-desc{text-align:left;margin:16px 0 30px}
+.ai-modes{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:30px}
+.amode{background:var(--bg2);border:1px solid var(--border);padding:20px 18px;transition:border-color .3s,transform .3s}
+.amode:hover{border-color:var(--cyan);transform:translateY(-3px)}
+.amode-icon{margin-bottom:10px}
+.amode-name{font-weight:700;font-size:.88rem;margin-bottom:5px}
+.amode-desc{color:var(--muted);font-size:.78rem;line-height:1.55}
+.act-chips{display:flex;flex-wrap:wrap;gap:9px;margin-top:8px}
+.achip{display:inline-flex;align-items:center;gap:8px;background:rgba(139,92,246,.06);border:1px solid rgba(139,92,246,.18);padding:9px 16px;font-family:'Space Mono',monospace;font-size:.7rem;letter-spacing:1px;color:var(--text);transition:all .25s;cursor:none}
+.achip svg{color:var(--violet)}
+.achip:hover{background:rgba(139,92,246,.15);border-color:var(--violet);color:var(--violet);box-shadow:0 0 18px rgba(139,92,246,.18)}
+
+#export{padding:128px 64px;background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.exp-wrap{max-width:1200px;margin:0 auto}
+.exp-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;background:var(--border);border:1px solid var(--border);margin-top:64px}
+.ecard{background:var(--bg);padding:44px 30px;text-align:center;opacity:0;transform:translateY(18px);transition:all .4s ease}
+.ecard.vis{opacity:1;transform:translateY(0)}
+.ecard:hover{background:var(--bg3)}
+.ecard-icon{display:flex;justify-content:center;margin-bottom:20px}
+.ecard-icon svg{color:var(--cyan);transition:filter .3s}
+.ecard:hover .ecard-icon svg{filter:drop-shadow(0 0 10px var(--cyan))}
+.ecard-name{font-weight:700;font-size:.95rem;margin-bottom:10px;color:var(--text)}
+.ecard-desc{color:var(--muted);font-size:.82rem;line-height:1.65}
+.ecard-badge{display:inline-block;margin-top:18px;font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:2px;color:var(--yellow);background:rgba(255,209,77,.07);border:1px solid rgba(255,209,77,.2);padding:3px 10px;text-transform:uppercase}
+
+#shortcuts{padding:128px 64px;max-width:1200px;margin:0 auto}
+.sk-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:64px}
+.sk{display:flex;align-items:center;gap:14px;background:var(--bg2);border:1px solid var(--border);padding:15px 18px;opacity:0;transform:scale(.95);transition:all .3s ease}
+.sk.vis{opacity:1;transform:scale(1)}
+.sk:hover{border-color:rgba(139,92,246,.35);transform:translateX(4px)}
+.kbd{font-family:'Space Mono',monospace;font-size:.68rem;color:var(--cyan);background:rgba(0,229,255,.06);border:1px solid rgba(0,229,255,.18);border-bottom:2px solid rgba(0,229,255,.28);padding:5px 11px;white-space:nowrap;min-width:84px;text-align:center}
+.sk-lbl{color:var(--muted);font-size:.82rem}
+
+#tech{padding:128px 64px;background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.tech-wrap{max-width:1200px;margin:0 auto}
+.tech-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:2px;background:var(--border);border:1px solid var(--border);margin-top:64px}
+.tcard{background:var(--bg);padding:34px 20px;text-align:center;opacity:0;transform:translateY(14px);transition:all .4s ease}
+.tcard.vis{opacity:1;transform:translateY(0)}
+.tcard:hover{background:var(--bg3)}
+.tcard-icon{display:flex;justify-content:center;margin-bottom:14px}
+.tcard-icon svg{color:var(--cyan);opacity:.85;transition:all .3s}
+.tcard:hover .tcard-icon svg{opacity:1;filter:drop-shadow(0 0 8px var(--cyan))}
+.tcard-name{font-weight:700;font-size:.86rem;margin-bottom:4px}
+.tcard-ver{font-family:'Space Mono',monospace;font-size:.63rem;color:var(--cyan);letter-spacing:1px}
+
+#install{padding:128px 64px;max-width:860px;margin:0 auto}
+.inst-steps{display:flex;flex-direction:column;gap:4px;margin-top:64px}
+.istep{display:grid;grid-template-columns:60px 1fr;gap:24px;align-items:start;background:var(--bg2);border:1px solid var(--border);padding:30px 34px;opacity:0;transform:translateX(-18px);transition:all .45s ease}
+.istep.vis{opacity:1;transform:translateX(0)}
+.istep:hover{border-color:rgba(0,229,255,.18)}
+.istep-n{font-family:'Space Mono',monospace;font-size:1.7rem;font-weight:700;color:rgba(0,229,255,.18);line-height:1}
+.istep-title{font-size:1rem;font-weight:700;margin-bottom:14px}
+.codeblock{background:#030507;border:1px solid rgba(0,229,255,.09);border-left:2px solid var(--cyan);padding:15px 18px;font-family:'JetBrains Mono',monospace;font-size:.77rem;color:var(--green);overflow-x:auto;position:relative;white-space:pre}
+.cmt{color:var(--muted)}.cmd{color:var(--cyan)}
+.copybtn{position:absolute;top:8px;right:8px;background:rgba(0,229,255,.07);border:1px solid rgba(0,229,255,.18);color:var(--cyan);font-family:'Space Mono',monospace;font-size:.58rem;padding:3px 9px;cursor:none;transition:all .2s;letter-spacing:1px}
+.copybtn:hover{background:rgba(0,229,255,.14)}
+
+#roadmap{padding:128px 64px;background:var(--bg2);border-top:1px solid var(--border)}
+.road-wrap{max-width:820px;margin:0 auto}
+.road-list{display:flex;flex-direction:column;border:1px solid var(--border);margin-top:64px}
+.ritem{display:flex;gap:22px;align-items:center;padding:22px 28px;border-bottom:1px solid rgba(255,255,255,.04);opacity:0;transform:translateX(18px);transition:all .4s ease}
+.ritem.vis{opacity:1;transform:translateX(0)}
+.ritem:last-child{border-bottom:none}
+.ritem:hover{background:var(--bg3)}
+.rcheck{width:22px;height:22px;border:1.5px solid rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.rtxt{font-size:.9rem;color:var(--muted);line-height:1.5}
+.rbadge{margin-left:auto;font-family:'Space Mono',monospace;font-size:.58rem;letter-spacing:2px;text-transform:uppercase;padding:3px 10px;flex-shrink:0}
+.rb-s{color:var(--yellow);background:rgba(255,209,77,.07);border:1px solid rgba(255,209,77,.2)}
+.rb-p{color:var(--violet);background:rgba(139,92,246,.07);border:1px solid rgba(139,92,246,.2)}
+
+#cta{padding:110px 64px;text-align:center;position:relative;z-index:1;overflow:hidden}
+#cta::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(139,92,246,.08),rgba(0,229,255,.05))}
+.line-t{position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--violet),var(--cyan),transparent)}
+.line-b{position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),var(--violet),transparent)}
+
+footer{padding:56px 64px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--bg);position:relative;z-index:1}
+.foot-logo{font-family:'Space Mono',monospace;font-size:.95rem;font-weight:700;color:var(--cyan);letter-spacing:3px}
+.foot-logo em{font-style:normal;color:var(--violet)}
+.foot-links{display:flex;gap:28px;list-style:none}
+.foot-links a{color:var(--muted);text-decoration:none;font-size:.82rem;transition:color .2s}
+.foot-links a:hover{color:var(--cyan)}
+.foot-meta{font-family:'Space Mono',monospace;font-size:.68rem;color:var(--muted);letter-spacing:1px}
+.foot-meta a{color:var(--violet);text-decoration:none}
+
+@media(max-width:960px){
+  nav{padding:16px 24px}.nav-links{display:none}
+  #why,#ai,#features,#export,#shortcuts,#tech,#install,#roadmap,#cta{padding:80px 24px}
+  .why-grid,.ai-grid{grid-template-columns:1fr}
+  .feat-grid{grid-template-columns:1fr}.fc.wide{grid-column:span 1}
+  .exp-grid{grid-template-columns:1fr 1fr}
+  .sk-grid{grid-template-columns:1fr 1fr}
+  .tech-grid{grid-template-columns:repeat(3,1fr)}
+  footer{flex-direction:column;gap:24px;text-align:center}
+  .foot-links{flex-wrap:wrap;justify-content:center}
+  .hero-stats{gap:28px}
+}
+</style>
+</head>
+<body>
+
+<div id="cur"></div>
+<div id="cur-ring"></div>
+<div class="scan"></div>
+<div class="grid-bg"></div>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="#" class="nav-logo">Code<em>Tools</em>++</a>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#ai">AI Engine</a></li>
+    <li><a href="#export">Export</a></li>
+    <li><a href="#install">Install</a></li>
+    <li><a href="#roadmap">Roadmap</a></li>
+  </ul>
+  <a href="https://github.com/FastXStudios/CodeToolsPP" class="nav-btn" target="_blank">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+    GitHub
+  </a>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <div class="hero-badge"><span class="bdot"></span>v1.0 · MIT License · Python 3.12+</div>
+
+  <div class="hero-icon-wrap">
+    <div class="ring r1"></div>
+    <div class="ring r2"></div>
+    <div class="ring r3"></div>
+    <div class="hero-icon">
+      <img src="icono.png" alt="Hero Icon" width="104" height="104"/>
+    </div>
+  </div>
+  
+
+  <h1 class="hero-title">
+    <span class="t1">Code Tools</span>
+    <span class="t2"><span class="glitch" data-text="Plus Plus">Plus Plus</span></span>
+  </h1>
+
+  <p class="hero-sub">AI-powered desktop toolkit for developers who work with large codebases. Explore, analyze, clean, document, and chat with your code — all from a single interface.</p>
+
+  <div class="hero-btns">
+    <a href="/App.rar" class="btn-p" download>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7 10 12 15 17 10"/>
+        <line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      Download Free
+    </a>
+    
+    <a href="https://github.com/FastXStudios/CodeToolsPP" class="btn-s" target="_blank">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+      View on GitHub
+    </a>
+  </div>
+
+  <div class="hero-stats">
+    <div class="h-stat"><span class="num" data-count="7">0</span><span class="lbl">Core Modules</span></div>
+    <div class="stat-sep"></div>
+    <div class="h-stat"><span class="num" data-count="4">0</span><span class="lbl">UI Languages</span></div>
+    <div class="stat-sep"></div>
+    <div class="h-stat"><span class="num" data-count="5">0</span><span class="lbl">AI Actions</span></div>
+    <div class="stat-sep"></div>
+    <div class="h-stat"><span class="num" data-count="16">0</span><span class="lbl">Shortcuts</span></div>
+  </div>
+
+  <div class="scroll-ind"><div class="scroll-mouse"></div><span>Scroll</span></div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker-wrap"><div class="ticker" id="ticker">
+  <!-- Items x2 for seamless loop -->
+  <span class="t-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>AI Chat Engine<span class="t-sep">·</span></span>
+  <span class="t-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Repo Explorer<span class="t-sep">·</span></span>
+  <span class="t-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>LLM Export<span class="t-sep">·</span></span>
+  <span class="t-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Quality Dashboard<span class="t-sep">·</span></span>
+  <span class="t-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>LimpMax Cleaner<span class="t-sep">·</span></span>
+  <span class="t-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>README Generator<span class="t-sep">·</span></span>
+  <span class="t-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>16+ Shortcuts<span class="t-sep">·</span></span>
+  <span class="t-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>4 UI Languages<span class="t-sep">·</span></span>
+  <!-- duplicate -->
+  <span class="t-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>AI Chat Engine<span class="t-sep">·</span></span>
+  <span class="t-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Repo Explorer<span class="t-sep">·</span></span>
+  <span class="t-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>LLM Export<span class="t-sep">·</span></span>
+  <span class="t-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Quality Dashboard<span class="t-sep">·</span></span>
+  <span class="t-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>LimpMax Cleaner<span class="t-sep">·</span></span>
+  <span class="t-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>README Generator<span class="t-sep">·</span></span>
+  <span class="t-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>16+ Shortcuts<span class="t-sep">·</span></span>
+  <span class="t-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>4 UI Languages<span class="t-sep">·</span></span>
+</div></div>
+
+<!-- WHY -->
+<section id="why">
+  <div class="why-grid">
+    <div>
+      <div class="sec-tag"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>The Problem</div>
+      <h2 class="sec-title" style="text-align:left;margin-bottom:10px;">Before Code<br/>Tools++</h2>
+      <p style="color:var(--muted);font-size:.88rem;margin-bottom:28px;line-height:1.7;">Every dev who preps a codebase for AI review has lived through this:</p>
+      <div class="why-steps">
+        <div class="w-step"><span class="w-num">01</span><span class="w-text strike">Manually open folders, cherry-pick files one by one.</span></div>
+        <div class="w-step"><span class="w-num">02</span><span class="w-text strike">Copy-paste contents into a prompt — hoping you didn't miss context.</span></div>
+        <div class="w-step"><span class="w-num">03</span><span class="w-text strike">Hunt down TODO/FIXMEs and dead code separately.</span></div>
+        <div class="w-step"><span class="w-num">04</span><span class="w-text strike">Clean up print() statements file by file before every commit.</span></div>
+        <div class="w-step"><span class="w-num">05</span><span class="w-text strike">Write a README from scratch at the end of the sprint.</span></div>
+      </div>
+    </div>
+    <div class="why-card">
+      <div class="why-card-tag">The Solution</div>
+      <h3>Eliminates<br/><span>all of that.</span></h3>
+      <p>A native desktop app built for the workflows developers actually run — with a built-in AI assistant as a first-class feature, not an afterthought.</p>
+      <div class="chips">
+        <div class="chip"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>One-click AI context</div>
+        <div class="chip"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Bulk code cleaning</div>
+        <div class="chip"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Auto README gen</div>
+        <div class="chip"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Quality dashboard</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="feat-wrap">
+    <div class="sec-head">
+      <div class="sec-tag"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Capabilities</div>
+      <h2 class="sec-title">Everything you need.<br/>Nothing you don't.</h2>
+      <p class="sec-desc">Six powerful modules in a single desktop app — no switching tools, no context loss.</p>
+    </div>
+    <div class="feat-grid">
+
+      <div class="fc wide">
+        <div class="fc-icon"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+        <div class="fc-title">AI Chat &amp; Model Engine</div>
+        <p class="fc-desc">Full conversational AI directly connected to your files. Built-in DeepSeek plus any model on OpenRouter — GPT-4o, Claude, Gemini, Mistral, LLaMA and hundreds more.</p>
+        <div class="mode-chips"><span class="mchip mc-c">Smart Mode</span><span class="mchip mc-v">Full Mode</span></div>
+        <ul class="fc-list" style="display:grid;grid-template-columns:1fr 1fr;gap:0;margin-top:20px">
+          <li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Analyze structure &amp; patterns</li>
+          <li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Fix bugs automatically</li>
+          <li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Generate inline docstrings</li>
+          <li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Optimize performance</li>
+          <li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Explain in plain language</li>
+          <li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Syntax-highlighted output</li>
+        </ul>
+        <span class="fc-tag">Core Feature</span>
+      </div>
+
+      <div class="fc">
+        <div class="fc-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div>
+        <div class="fc-title">Intelligent Repo Explorer</div>
+        <p class="fc-desc">File tree with recursive checkboxes. Visual warnings for heavy dirs — node_modules, .git, venv — before you include them accidentally.</p>
+        <ul class="fc-list"><li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Recursive checkboxes</li><li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Recent folders history</li><li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Fast file search</li></ul>
+      </div>
+
+      <div class="fc">
+        <div class="fc-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+        <div class="fc-title">Quality Dashboard</div>
+        <p class="fc-desc">Project stats, TODO/FIXME tracker, duplicate detector, and language distribution — in one view. No external tooling required.</p>
+        <ul class="fc-list"><li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Lines of code &amp; metrics</li><li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Duplicate file detection</li><li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Language breakdown</li></ul>
+      </div>
+
+      <div class="fc">
+        <div class="fc-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></div>
+        <div class="fc-title">LimpMax Cleaner</div>
+        <p class="fc-desc">Safe bulk removal of print(), console.log(), logging.* statements across the entire project before commits or code reviews.</p>
+        <ul class="fc-list"><li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Language-aware rules</li><li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Configurable per language</li><li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Fast &amp; deterministic</li></ul>
+        <span class="fc-tag">Pre-commit</span>
+      </div>
+
+      <div class="fc">
+        <div class="fc-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+        <div class="fc-title">README Generator</div>
+        <p class="fc-desc">Full Markdown README from project structure with live preview and real-time translation. ES / EN / ZH / RU. Under 2 minutes.</p>
+        <ul class="fc-list"><li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Live Markdown preview</li><li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>4 language translation</li><li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Instant export</li></ul>
+        <span class="fc-tag">Documentation</span>
+      </div>
+
+      <div class="fc">
+        <div class="fc-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+        <div class="fc-title">UX Built for Speed</div>
+        <p class="fc-desc">16+ keyboard shortcuts, hot-swap themes without restart, real-time file preview, and custom menus for uninterrupted workflow.</p>
+        <ul class="fc-list"><li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Ctrl+O, F5, Ctrl+F &amp; more</li><li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Theme &amp; language hot-swap</li><li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Zoom in/out support</li></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AI -->
+<section id="ai">
+  <div class="ai-grid">
+    <div class="chat-mock">
+      <div class="chat-topbar">
+        <div class="cdt"></div><div class="cdt"></div><div class="cdt"></div>
+        <span class="chat-tabl">AI CHAT — code_analyzer.py · 3 files selected</span>
+      </div>
+      <div class="chat-body">
+        <div class="cmsg" id="cm1">
+          <div class="cav cav-u"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+          <div class="cbub">Why is <span class="cinline">analyze_tree()</span> returning None for nested dirs?</div>
+        </div>
+        <div class="cmsg" id="cm2">
+          <div class="cav cav-a"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#00e5ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+          <div class="cbub ai">The recursive call isn't returning its value. Line 47:<div class="ccode">- analyze_tree(subtree)
++ return analyze_tree(subtree)</div>Missing base case on empty dir:<div class="ccode">if not entries:
+    return {}</div></div>
+        </div>
+        <div class="cmsg" id="cm3">
+          <div class="cav cav-u"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+          <div class="cbub">Generate docstrings for all functions in this file.</div>
+        </div>
+        <div class="cmsg" id="cm4">
+          <div class="cav cav-a"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#00e5ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+          <div class="cbub ai">Generating documentation for 12 functions... ✓<div class="ccode vi">def analyze_tree(path: str) -> dict:
+    """Recursively analyzes directory
+    structure and returns metadata map.
+    Args: path (str): Root directory
+    Returns: dict: File metadata tree
+    """</div></div>
+        </div>
+      </div>
+      <div class="chat-inp">
+        <div class="cinput">Ask anything about your code...</div>
+        <button class="csend"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+      </div>
+    </div>
+
+    <div class="ai-content">
+      <div class="sec-tag"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>AI Engine</div>
+      <h2 class="sec-title">Your codebase,<br/>fully understood.</h2>
+      <p class="sec-desc">Built-in DeepSeek plus full OpenRouter support. Any LLM, directly connected to your files with persistent chat history.</p>
+      <div class="ai-modes">
+        <div class="amode">
+          <div class="amode-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+          <div class="amode-name">Smart Mode</div>
+          <div class="amode-desc">Sends file metadata — name, extension, line count, size. Fast and lightweight.</div>
+        </div>
+        <div class="amode">
+          <div class="amode-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--violet)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+          <div class="amode-name">Full Mode</div>
+          <div class="amode-desc">Sends complete file contents for deep analysis, refactoring, and documentation.</div>
+        </div>
+      </div>
+      <p style="color:var(--muted);font-size:.78rem;letter-spacing:1.5px;text-transform:uppercase;font-family:'Space Mono',monospace;margin-bottom:12px;">One-click actions</p>
+      <div class="act-chips">
+        <div class="achip"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Analyze</div>
+        <div class="achip"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Fix Errors</div>
+        <div class="achip"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Document</div>
+        <div class="achip"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Optimize</div>
+        <div class="achip"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Explain</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EXPORT -->
+<section id="export">
+  <div class="exp-wrap">
+    <div class="sec-head">
+      <div class="sec-tag"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Export Modes</div>
+      <h2 class="sec-title">Four ways to share<br/>your code.</h2>
+      <p class="sec-desc">Professional export modes designed for real developer workflows — from raw content to LLM-optimized formats.</p>
+    </div>
+    <div class="exp-grid">
+      <div class="ecard"><div class="ecard-icon"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></div><div class="ecard-name">Copy with Content</div><div class="ecard-desc">Full file contents concatenated and ready to paste anywhere.</div></div>
+      <div class="ecard"><div class="ecard-icon"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></div><div class="ecard-name">Copy Paths Only</div><div class="ecard-desc">Relative paths of all selected files for quick reference.</div></div>
+      <div class="ecard"><div class="ecard-icon"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg></div><div class="ecard-name">Copy Tree</div><div class="ecard-desc">ASCII directory structure — perfect for documentation and GitHub issues.</div></div>
+      <div class="ecard"><div class="ecard-icon"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg></div><div class="ecard-name">Copy for LLM</div><div class="ecard-desc">Structured format with paths, language markers, and clean separators. Optimized for AI prompts.</div><span class="ecard-badge">Recommended</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- SHORTCUTS -->
+<section id="shortcuts">
+  <div class="sec-head">
+    <div class="sec-tag"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>Shortcuts</div>
+    <h2 class="sec-title">Built for the<br/>keyboard-first dev.</h2>
+    <p class="sec-desc">16 shortcuts to keep your hands on the keys and your flow uninterrupted.</p>
+  </div>
+  <div class="sk-grid">
+    <div class="sk"><span class="kbd">Ctrl+O</span><span class="sk-lbl">Open folder</span></div>
+    <div class="sk"><span class="kbd">Ctrl+F</span><span class="sk-lbl">Search files</span></div>
+    <div class="sk"><span class="kbd">Ctrl+C</span><span class="sk-lbl">Copy selected</span></div>
+    <div class="sk"><span class="kbd">Ctrl+D</span><span class="sk-lbl">Clear selection</span></div>
+    <div class="sk"><span class="kbd">F5</span><span class="sk-lbl">Refresh tree</span></div>
+    <div class="sk"><span class="kbd">Ctrl+P</span><span class="sk-lbl">Show/Hide preview</span></div>
+    <div class="sk"><span class="kbd">E / Space</span><span class="sk-lbl">Mark / Unmark file</span></div>
+    <div class="sk"><span class="kbd">Ctrl++</span><span class="sk-lbl">Zoom in</span></div>
+    <div class="sk"><span class="kbd">Ctrl+-</span><span class="sk-lbl">Zoom out</span></div>
+    <div class="sk"><span class="kbd">Ctrl+0</span><span class="sk-lbl">Reset zoom</span></div>
+    <div class="sk"><span class="kbd">Ctrl+Q</span><span class="sk-lbl">Exit application</span></div>
+    <div class="sk"><span class="kbd">Double Click</span><span class="sk-lbl">Mark file</span></div>
+    <div class="sk"><span class="kbd">Right Click</span><span class="sk-lbl">Context menu</span></div>
+    <div class="sk"><span class="kbd">Ctrl+Scroll</span><span class="sk-lbl">Zoom with mouse</span></div>
+  </div>
+</section>
+
+<!-- TECH -->
+<section id="tech">
+  <div class="tech-wrap">
+    <div class="sec-head">
+      <div class="sec-tag"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>Tech Stack</div>
+      <h2 class="sec-title">Powered by Python.<br/>Zero bloat.</h2>
+      <p class="sec-desc">Native desktop app — no Electron, no web wrapper, no memory hogs.</p>
+    </div>
+    <div class="tech-grid">
+      <div class="tcard"><div class="tcard-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div><div class="tcard-name">Python</div><div class="tcard-ver">3.12+</div></div>
+      <div class="tcard"><div class="tcard-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div><div class="tcard-name">Tkinter</div><div class="tcard-ver">GUI Layer</div></div>
+      <div class="tcard"><div class="tcard-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div><div class="tcard-name">Pillow</div><div class="tcard-ver">Images</div></div>
+      <div class="tcard"><div class="tcard-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div><div class="tcard-name">Matplotlib</div><div class="tcard-ver">Charts</div></div>
+      <div class="tcard"><div class="tcard-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div class="tcard-name">Markdown2</div><div class="tcard-ver">Rendering</div></div>
+      <div class="tcard"><div class="tcard-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div><div class="tcard-name">Requests</div><div class="tcard-ver">HTTP</div></div>
+      <div class="tcard"><div class="tcard-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></div><div class="tcard-name">Pyperclip</div><div class="tcard-ver">Clipboard</div></div>
+      <div class="tcard"><div class="tcard-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div><div class="tcard-name">OpenAI API</div><div class="tcard-ver">AI Layer</div></div>
+      <div class="tcard"><div class="tcard-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg></div><div class="tcard-name">tkinterweb</div><div class="tcard-ver">HTML render</div></div>
+      <div class="tcard"><div class="tcard-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div><div class="tcard-name">PyInstaller</div><div class="tcard-ver">Build</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- INSTALL -->
+<section id="install">
+  <div class="sec-head">
+    <div class="sec-tag"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Installation</div>
+    <h2 class="sec-title">Up and running<br/>in 4 steps.</h2>
+    <p class="sec-desc">Python 3.12+ required. Windows primary, Linux/macOS functional.</p>
+  </div>
+  <div class="inst-steps">
+    <div class="istep"><div class="istep-n">01</div><div><div class="istep-title">Clone the repository</div><div class="codeblock"><button class="copybtn" onclick="copyCode(this)">COPY</button><span class="cmd">git clone</span> https://github.com/FastXStudios/CodeToolsPP.git
+<span class="cmd">cd</span> CodeTools-</div></div></div>
+    <div class="istep"><div class="istep-n">02</div><div><div class="istep-title">Create virtual environment</div><div class="codeblock"><button class="copybtn" onclick="copyCode(this)">COPY</button><span class="cmt"># Windows</span>
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+
+<span class="cmt"># Linux / macOS</span>
+python -m venv .venv
+source .venv/bin/activate</div></div></div>
+    <div class="istep"><div class="istep-n">03</div><div><div class="istep-title">Install dependencies</div><div class="codeblock"><button class="copybtn" onclick="copyCode(this)">COPY</button>pip install -r requirements.txt</div></div></div>
+    <div class="istep"><div class="istep-n">04</div><div><div class="istep-title">Launch Code Tools++</div><div class="codeblock"><button class="copybtn" onclick="copyCode(this)">COPY</button>python main.py</div></div></div>
+  </div>
+</section>
+
+<!-- ROADMAP -->
+<section id="roadmap">
+  <div class="road-wrap">
+    <div class="sec-head">
+      <div class="sec-tag"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Roadmap</div>
+      <h2 class="sec-title">What's coming next.</h2>
+      <p class="sec-desc">Active development with clear priorities. Contributions are welcome.</p>
+    </div>
+    <div class="road-list">
+      <div class="ritem"><div class="rcheck"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/></svg></div><div class="rtxt">Performance optimization for very large repositories (&gt;10k files)</div><span class="rbadge rb-s">Soon</span></div>
+      <div class="ritem"><div class="rcheck"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/></svg></div><div class="rtxt">More LLM export presets — system prompt templates, token budget awareness</div><span class="rbadge rb-s">Soon</span></div>
+      <div class="ritem"><div class="rcheck"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/></svg></div><div class="rtxt">Extended LimpMax rules and per-file safety controls</div><span class="rbadge rb-p">Planned</span></div>
+      <div class="ritem"><div class="rcheck"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/></svg></div><div class="rtxt">Automated test suite with full coverage</div><span class="rbadge rb-p">Planned</span></div>
+      <div class="ritem"><div class="rcheck"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/></svg></div><div class="rtxt">Release pipeline and auto-update support</div><span class="rbadge rb-p">Planned</span></div>
+      <div class="ritem"><div class="rcheck"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/></svg></div><div class="rtxt">Linux / macOS native packaging</div><span class="rbadge rb-p">Planned</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="cta">
+  <div class="line-t"></div>
+  <div class="line-b"></div>
+  <div style="position:relative;z-index:1;">
+    <div class="sec-tag" style="margin-bottom:24px;">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+      Open Source · MIT License
+    </div>
+    <h2 style="font-size:clamp(2.5rem,5.5vw,4.2rem);font-weight:800;margin-bottom:20px;line-height:1.1;">Stop switching tools.<br/><span style="background:linear-gradient(125deg,var(--cyan),var(--violet));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Start shipping.</span></h2>
+    <p style="color:var(--muted);max-width:480px;margin:0 auto 44px;line-height:1.75;font-size:.95rem;">Free, MIT licensed, open source. Built by a developer who was tired of the same broken workflow.</p>
+    <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
+      <a href="/App.rar" class="btn-p" download>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Download Free
+      </a>
+      
+      <a href="mailto:byronvera113@gmail.com" class="btn-s">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        Contact Author
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="foot-logo">Code<em>Tools</em>++</div>
+  <ul class="foot-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#ai">AI Engine</a></li>
+    <li><a href="#install">Install</a></li>
+    <li><a href="https://github.com/FastXStudios/CodeToolsPP" target="_blank">GitHub</a></li>
+  </ul>
+  <div class="foot-meta">Built by <a href="mailto:byronvera113@gmail.com">Byron Vera</a> · MIT License</div>
+</footer>
+
+<script>
+const cur=document.getElementById('cur'),ring=document.getElementById('cur-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+'px';cur.style.top=my+'px';});
+(function anim(){rx+=(mx-rx)*.11;ry+=(my-ry)*.11;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(anim)})();
+document.querySelectorAll('a,button,.achip,.chip,.fc,.amode,.ecard,.sk,.tcard').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{cur.style.width='18px';cur.style.height='18px';cur.style.background='var(--violet)';ring.style.width='48px';ring.style.height='48px';});
+  el.addEventListener('mouseleave',()=>{cur.style.width='10px';cur.style.height='10px';cur.style.background='var(--cyan)';ring.style.width='34px';ring.style.height='34px';});
+});
+
+window.addEventListener('scroll',()=>document.getElementById('nav').classList.toggle('scrolled',scrollY>60));
+
+const io=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting)setTimeout(()=>e.target.classList.add('vis'),e.target.dataset.d||0);});
+},{threshold:.14});
+document.querySelectorAll('.w-step,.fc,.ecard,.sk,.tcard,.istep,.ritem').forEach((el,i)=>{el.dataset.d=(i%6)*70;io.observe(el);});
+
+const co=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){['cm1','cm2','cm3','cm4'].forEach((id,i)=>setTimeout(()=>{const m=document.getElementById(id);if(m)m.classList.add('vis');},i*650));co.disconnect();}});},{threshold:.3});
+const ce=document.querySelector('.chat-mock');if(ce)co.observe(ce);
+
+function countUp(el){const t=+el.dataset.count;let n=0;const s=t/42;const ti=setInterval(()=>{n+=s;if(n>=t){el.textContent=t+(t>=10?'+':'');clearInterval(ti);return;}el.textContent=Math.floor(n);},28);}
+const so=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){document.querySelectorAll('[data-count]').forEach(countUp);so.disconnect();}});},{threshold:.5});
+const se=document.querySelector('.hero-stats');if(se)so.observe(se);
+
+function copyCode(btn){
+  const b=btn.parentElement;
+  const t=Array.from(b.childNodes).filter(n=>n.nodeType===3||n.tagName==='SPAN').map(n=>n.textContent).join('').replace(/^COPY\n/,'').trim();
+  navigator.clipboard.writeText(t).then(()=>{btn.textContent='COPIED';btn.style.color='var(--green)';setTimeout(()=>{btn.textContent='COPY';btn.style.color='';},2000);});
+}
+
+window.addEventListener('mousemove',e=>{
+  const px=(e.clientX/innerWidth-.5)*22,py=(e.clientY/innerHeight-.5)*22;
+  document.querySelectorAll('.orb').forEach((o,i)=>{const f=(i+1)*.38;o.style.transform=`translate(${px*f}px,${py*f}px)`;});
+});
+</script>
+</body>
+</html>
